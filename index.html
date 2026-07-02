@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xắn Tay Áo Xử Drama</title>
+
+<!-- ==== THAY "https://refresh-yourconer.netlify.app" bằng link web thật sau khi deploy xong ==== -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Xắn Tay Áo Xử Drama — Game cảm xúc chốn công sở">
+<meta property="og:description" content="Tin đồn, nhóm chat combat, sếp thiên vị, bị cô lập... Chọn nhân vật, xử lý 10 tình huống drama công sở và khám phá cách bạn phản ứng với drama. Chơi ngay, miễn phí!">
+<meta property="og:image" content="https://refresh-yourconer.netlify.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="628">
+<meta property="og:url" content="https://refresh-yourconer.netlify.app">
+<meta property="og:locale" content="vi_VN">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Xắn Tay Áo Xử Drama — Game cảm xúc chốn công sở">
+<meta name="twitter:description" content="Làm gì khi gặp drama? Chọn cảm xúc của bạn — chơi ngay, miễn phí!">
+<meta name="twitter:image" content="https://refresh-yourconer.netlify.app/og-image.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+
+  :root{
+    --paper:#F6F3FF;
+    --ink:#241E4E;
+    --coral:#FF6B6B;
+    --mint:#3FBFB0;
+    --sun:#FFC94A;
+    --grape:#7B61FF;
+    --grape-dark:#5C42D6;
+    --card:#FFFFFF;
+    --shadow: 0 8px 0 rgba(36,30,78,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Be Vietnam Pro', sans-serif;
+    background:
+      radial-gradient(circle at 10% 15%, rgba(255,201,74,0.25), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(63,191,176,0.25), transparent 40%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    overflow-x:hidden;
+  }
+  .stage{
+    width:100%;
+    max-width:720px;
+    position:relative;
+  }
+  h1,h2,h3{
+    font-family:'Baloo 2', sans-serif;
+    margin:0;
+  }
+  .screen{ display:none; animation: fadeUp .5s ease; }
+  .screen.active{ display:block; }
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(14px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  /* ---- top mute button ---- */
+  .mute-btn{
+    position:absolute;
+    top:-8px; right:0;
+    background:var(--card);
+    border:none;
+    border-radius:999px;
+    width:44px; height:44px;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    font-size:20px;
+    display:flex; align-items:center; justify-content:center;
+    z-index:5;
+  }
+  .mute-btn:active{ transform:translateY(3px); box-shadow:0 4px 0 rgba(36,30,78,0.12); }
+
+  /* ---- intro screen ---- */
+  .badge-eyebrow{
+    display:inline-block;
+    background:var(--grape);
+    color:#fff;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.06em;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  .intro h1{
+    font-size:clamp(32px,6vw,46px);
+    line-height:1.05;
+    color:var(--ink);
+  }
+  .intro h1 span{ color:var(--grape); }
+  .intro p.lead{
+    font-size:17px;
+    line-height:1.6;
+    color:#4a4470;
+    max-width:56ch;
+    margin-top:14px;
+  }
+  .cta-row{ margin-top:26px; }
+  .btn-primary{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:18px;
+    background:var(--grape);
+    color:#fff;
+    border:none;
+    padding:16px 30px;
+    border-radius:16px;
+    cursor:pointer;
+    box-shadow:0 6px 0 var(--grape-dark);
+    transition:transform .08s ease;
+  }
+  .btn-primary:active{ transform:translateY(4px); box-shadow:0 2px 0 var(--grape-dark); }
+  .btn-primary:hover{ filter:brightness(1.05); }
+
+  /* ---- character select ---- */
+  .char-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+    margin-top:28px;
+  }
+  .char-card{
+    background:var(--card);
+    border-radius:22px;
+    padding:16px 10px 18px;
+    text-align:center;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    border:3px solid transparent;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .char-card:hover{ transform:translateY(-6px); }
+  .char-card.selected{ border-color:var(--sun); transform:translateY(-6px); }
+  .char-card svg{ width:100%; max-width:120px; height:auto; }
+  .char-name{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    margin-top:8px;
+    font-size:15px;
+  }
+  .char-tag{
+    font-size:12.5px;
+    color:#6a6390;
+    margin-top:2px;
+  }
+
+  /* ---- game screen ---- */
+  .hud{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:18px;
+  }
+  .avatar-wrap{
+    width:64px; height:64px;
+    background:var(--card);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .avatar-wrap svg{ width:52px; height:52px; }
+  .hud-bar-area{ flex:1; }
+  .hud-label{
+    font-size:12.5px;
+    font-weight:600;
+    color:#6a6390;
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:4px;
+  }
+  .bar-track{
+    background:#e9e5fb;
+    border-radius:999px;
+    height:14px;
+    overflow:hidden;
+    box-shadow:inset 0 2px 3px rgba(36,30,78,0.1);
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg, var(--coral), var(--sun), var(--mint));
+    transition:width .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .progress-dots{
+    display:flex; gap:5px; margin-top:6px;
+  }
+  .progress-dots span{
+    width:8px; height:8px; border-radius:999px; background:#dcd6f7;
+  }
+  .progress-dots span.done{ background:var(--grape); }
+
+  .scenario-card{
+    background:var(--card);
+    border-radius:24px;
+    padding:26px 24px;
+    box-shadow:var(--shadow);
+    position:relative;
+  }
+  .scenario-tag{
+    font-family:'Baloo 2', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    color:var(--grape);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  .scenario-text{
+    font-size:18px;
+    line-height:1.55;
+    margin-top:8px;
+    font-weight:500;
+  }
+  .choices{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .choice-btn{
+    text-align:left;
+    background:#faf9ff;
+    border:2px solid #e9e5fb;
+    border-radius:14px;
+    padding:14px 16px;
+    font-family:'Be Vietnam Pro', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    cursor:pointer;
+    transition:border-color .12s ease, transform .08s ease, background .12s ease;
+  }
+  .choice-btn:hover{ border-color:var(--grape); background:#f1edff; }
+  .choice-btn:active{ transform:scale(0.99); }
+  .choice-btn:disabled{ cursor:default; opacity:.55; }
+
+  .feedback{
+    margin-top:18px;
+    padding:16px 18px;
+    border-radius:14px;
+    font-size:14.5px;
+    line-height:1.55;
+    display:none;
+  }
+  .feedback.show{ display:block; animation:fadeUp .35s ease; }
+  .feedback.good{ background:#e6f8f4; border:2px solid var(--mint); }
+  .feedback.neutral{ background:#fff6e3; border:2px solid var(--sun); }
+  .feedback.bad{ background:#ffeceb; border:2px solid var(--coral); }
+  .feedback .fb-title{ font-family:'Baloo 2',sans-serif; font-weight:700; margin-bottom:4px; }
+
+  .next-row{ margin-top:18px; text-align:right; }
+
+  .speech-bubble{
+    position:absolute;
+    top:-6px; left:78px;
+    background:var(--ink);
+    color:#fff;
+    font-size:12.5px;
+    padding:6px 10px;
+    border-radius:10px;
+    opacity:0;
+    transition:opacity .25s ease, transform .25s ease;
+    transform:translateY(4px);
+    white-space:nowrap;
+  }
+  .speech-bubble.show{ opacity:1; transform:translateY(0); }
+
+  /* ---- badge popup ---- */
+  .badge-toast{
+    position:fixed;
+    top:24px; left:50%;
+    transform:translateX(-50%) translateY(-20px);
+    background:var(--ink);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:14px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    display:flex; align-items:center; gap:10px;
+    opacity:0;
+    transition:opacity .35s ease, transform .35s ease;
+    z-index:50;
+    box-shadow:0 10px 24px rgba(0,0,0,0.25);
+  }
+  .badge-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---- result screen ---- */
+  .result-card{
+    background:var(--card);
+    border-radius:24px;
+    padding:30px 26px;
+    box-shadow:var(--shadow);
+    text-align:center;
+  }
+  .result-avatar{ width:110px; margin:0 auto; }
+  .result-title{ font-size:26px; margin-top:10px; }
+  .result-sub{ color:#6a6390; margin-top:6px; font-size:14.5px; }
+  .badge-shelf{
+    display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+    margin-top:22px;
+  }
+  .badge-chip{
+    background:#f1edff;
+    border:2px solid #dcd2ff;
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:600;
+    display:flex; align-items:center; gap:6px;
+  }
+  .badge-chip.empty{ color:#a29bc7; border-style:dashed; }
+  .result-tip{
+    margin-top:20px;
+    background:#fff6e3;
+    border:2px solid var(--sun);
+    border-radius:14px;
+    padding:16px;
+    text-align:left;
+    font-size:14.5px;
+    line-height:1.55;
+  }
+  .result-tip b{ font-family:'Baloo 2', sans-serif; }
+  .restart-row{ margin-top:24px; }
+  .btn-ghost{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    background:transparent;
+    border:2px solid var(--grape);
+    color:var(--grape);
+    padding:12px 22px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:15px;
+  }
+  .btn-ghost:hover{ background:#f1edff; }
+
+  footer.credit{
+    text-align:center;
+    font-size:12px;
+    color:#9a92c2;
+    margin-top:18px;
+  }
+
+  @media (max-width:480px){
+    .char-grid{ gap:10px; }
+    .scenario-card{ padding:20px 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001s !important; transition-duration:.001s !important; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <button class="mute-btn" id="muteBtn" title="Bật/tắt âm thanh">🔊</button>
+
+  <!-- SCREEN 1: INTRO -->
+  <section class="screen active" id="screen-intro">
+    <span class="badge-eyebrow">GAME CẢM XÚC CHỐN CÔNG SỞ</span>
+    <h1>Xắn Tay Áo <span>Xử Drama</span></h1>
+    <p class="lead">Tin đồn sau lưng, nhóm chat combat, sếp thiên vị, bị lôi vào "chọn phe"... Drama công sở lúc nào cũng rình rập. Chọn một nhân vật, xử lý 10 tình huống drama "quen mặt", và khám phá cách bạn thật sự phản ứng khi drama ập đến!</p>
+    <div class="cta-row">
+      <button class="btn-primary" id="startBtn">Bắt đầu chơi →</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: CHARACTER SELECT -->
+  <section class="screen" id="screen-select">
+    <span class="badge-eyebrow">BƯỚC 1</span>
+    <h2 style="font-size:26px;">Chọn nhân vật đồng hành</h2>
+    <p style="color:#6a6390; margin-top:6px;">Nhân vật sẽ "sống cùng cảm xúc" của bạn suốt trò chơi.</p>
+    <div class="char-grid" id="charGrid"></div>
+    <div class="cta-row" style="text-align:center; margin-top:24px;">
+      <button class="btn-primary" id="confirmCharBtn" disabled>Vào công ty →</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: GAME -->
+  <section class="screen" id="screen-game">
+    <div class="hud">
+      <div class="avatar-wrap" id="hudAvatar" style="position:relative;">
+        <div class="speech-bubble" id="speechBubble"></div>
+      </div>
+      <div class="hud-bar-area">
+        <div class="hud-label"><span>Sức khỏe tinh thần</span><span id="scoreLabel">50%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="barFill" style="width:50%;"></div></div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="scenario-tag" id="scenarioTag">Tình huống 1/8</div>
+      <div class="scenario-text" id="scenarioText"></div>
+      <div class="choices" id="choicesWrap"></div>
+      <div class="feedback" id="feedbackBox">
+        <div class="fb-title" id="fbTitle"></div>
+        <div id="fbBody"></div>
+      </div>
+      <div class="next-row">
+        <button class="btn-primary" id="nextBtn" style="display:none;">Tiếp theo →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: RESULT -->
+  <section class="screen" id="screen-result">
+    <div class="result-card">
+      <div class="result-avatar" id="resultAvatar"></div>
+      <h2 class="result-title" id="resultTitle"></h2>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="badge-shelf" id="badgeShelf"></div>
+      <div class="result-tip" id="resultTip"></div>
+      <div class="restart-row">
+        <button class="btn-ghost" id="restartBtn">Chơi lại từ đầu</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="credit">Trò chơi mang tính chất giáo dục &amp; giải trí, không thay thế tư vấn tâm lý chuyên nghiệp.</footer>
+</div>
+
+<script>
+/* ============ AUDIO: playful synthesized SFX ============ */
+let audioCtx = null;
+let muted = false;
+function ctx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, start, dur, type='sine', gainVal=0.18){
+  if(muted) return;
+  const c = ctx();
+  const o = c.createOscillator();
+  const g = c.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, c.currentTime+start);
+  g.gain.setValueAtTime(0, c.currentTime+start);
+  g.gain.linearRampToValueAtTime(gainVal, c.currentTime+start+0.015);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+start+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(c.currentTime+start);
+  o.stop(c.currentTime+start+dur+0.02);
+}
+function sfxSelect(){ tone(520,0,.08,'triangle'); tone(780,.07,.09,'triangle'); }
+function sfxClickGood(){ tone(660,0,.09,'sine'); tone(880,.08,.12,'sine'); tone(1100,.16,.14,'sine'); }
+function sfxClickNeutral(){ tone(480,0,.1,'sine'); tone(520,.09,.12,'sine'); }
+function sfxClickBad(){ tone(300,0,.12,'sawtooth',0.1); tone(220,.1,.16,'sawtooth',0.09); }
+function sfxBadge(){ [520,660,880,1100].forEach((f,i)=>tone(f,i*0.09,.16,'triangle',0.16)); }
+function sfxWhoosh(){ tone(200,0,.15,'sine',0.08); tone(400,.05,.15,'sine',0.06); }
+function sfxCheer(){ [440,550,660,880,1100].forEach((f,i)=>tone(f,i*0.06,.2,'triangle',0.12)); }
+
+document.getElementById('muteBtn').addEventListener('click', ()=>{
+  muted = !muted;
+  document.getElementById('muteBtn').textContent = muted ? '🔇' : '🔊';
+});
+
+/* ============ CHARACTERS (chibi SVG) ============ */
+const characters = [
+  {
+    id:'nam', name:'Nam Nam', tag:'Năng động, thẳng thắn',
+    hair:'#2E3A6E', skin:'#FFD9B3', outfit:'#7B61FF', accent:'#3FBFB0'
+  },
+  {
+    id:'nu', name:'Nữ Nữ', tag:'Dịu dàng, tinh tế',
+    hair:'#7A3E2B', skin:'#FFE3C4', outfit:'#FF6B6B', accent:'#FFC94A'
+  },
+  {
+    id:'phi', name:'Phi Phi', tag:'Cá tính, phi giới tính',
+    hair:'#5C42D6', skin:'#F6D8B3', outfit:'#FFC94A', accent:'#7B61FF'
+  }
+];
+
+function chibiSVG(c, mood){
+  // mood: 'happy' | 'neutral' | 'sad'
+  let mouth, brow;
+  if(mood==='happy'){
+    mouth = `<path d="M40 62 Q50 72 60 62" stroke="#241E4E" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    brow = `<path d="M35 40 Q40 36 45 39" stroke="#241E4E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M55 39 Q60 36 65 40" stroke="#241E4E" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  } else if(mood==='sad'){
+    mouth = `<path d="M40 66 Q50 58 60 66" stroke="#241E4E" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    brow = `<path d="M35 42 Q40 46 46 43" stroke="#241E4E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M54 43 Q60 46 65 42" stroke="#241E4E" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  } else {
+    mouth = `<path d="M42 63 L58 63" stroke="#241E4E" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    brow = `<path d="M35 40 L46 40" stroke="#241E4E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M54 40 L65 40" stroke="#241E4E" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  }
+  let hairShape = '';
+  if(c.id==='nam'){
+    hairShape = `<path d="M18 38 Q20 10 50 10 Q80 10 82 38 Q70 26 50 26 Q30 26 18 38Z" fill="${c.hair}"/>`;
+  } else if(c.id==='nu'){
+    hairShape = `<path d="M15 40 Q12 8 50 8 Q88 8 85 40 Q90 70 78 78 Q82 45 70 30 Q60 20 50 20 Q40 20 30 30 Q18 45 22 78 Q10 70 15 40Z" fill="${c.hair}"/>`;
+  } else {
+    hairShape = `<path d="M16 36 Q10 6 50 6 Q90 6 84 36 Q78 14 50 14 Q22 14 16 36Z" fill="${c.hair}"/><circle cx="78" cy="20" r="5" fill="${c.accent}"/>`;
+  }
+  return `
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="88" rx="26" ry="8" fill="${c.outfit}" opacity="0.9"/>
+    <circle cx="50" cy="48" r="34" fill="${c.skin}"/>
+    ${hairShape}
+    <circle cx="38" cy="50" r="3.2" fill="#241E4E"/>
+    <circle cx="62" cy="50" r="3.2" fill="#241E4E"/>
+    <circle cx="26" cy="56" r="5" fill="${c.outfit}" opacity="0.35"/>
+    <circle cx="74" cy="56" r="5" fill="${c.outfit}" opacity="0.35"/>
+    ${brow}
+    ${mouth}
+    <path d="M20 82 Q50 100 80 82 L80 96 Q50 108 20 96 Z" fill="${c.outfit}"/>
+  </svg>`;
+}
+
+let chosenChar = null;
+
+const charGrid = document.getElementById('charGrid');
+characters.forEach(c=>{
+  const card = document.createElement('div');
+  card.className='char-card';
+  card.innerHTML = `${chibiSVG(c,'happy')}<div class="char-name">${c.name}</div><div class="char-tag">${c.tag}</div>`;
+  card.addEventListener('click', ()=>{
+    document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected'));
+    card.classList.add('selected');
+    chosenChar = c;
+    sfxSelect();
+    document.getElementById('confirmCharBtn').disabled = false;
+  });
+  charGrid.appendChild(card);
+});
+
+/* ============ SCENARIOS ============ */
+const scenarios = [
+  {
+    tag:'Tin đồn sai sự thật',
+    text:'Bạn nghe được rằng có một tin đồn sai sự thật về mình đang lan truyền khắp phòng ban.',
+    choices:[
+      {label:'Nổi giận, đăng đàn "bóc phốt" người tung tin ngay trên nhóm chat chung', tags:['reactive'], type:'bad',
+        fb:'Đối đầu công khai dễ khiến drama lan rộng và nghiêm trọng hơn, thay vì được giải quyết.'},
+      {label:'Bình tĩnh xác minh nguồn tin, rồi trao đổi trực tiếp và riêng tư với người liên quan', tags:['calm','boundary'], type:'good',
+        fb:'Xác minh trước khi phản ứng và chọn không gian riêng tư giúp giải quyết vấn đề gốc rễ mà không tạo thêm ồn ào.'},
+      {label:'Mặc kệ, hy vọng tin đồn tự động biến mất theo thời gian', tags:['avoidant'], type:'neutral',
+        fb:'Đôi khi im lặng là đủ, nhưng nếu tin đồn ảnh hưởng đến uy tín của bạn, im lặng quá lâu có thể khiến nó bị hiểu là thừa nhận.'}
+    ]
+  },
+  {
+    tag:'Nhóm chat "ngầm"',
+    text:'Bạn bị thêm vào một nhóm chat riêng chuyên bàn tán, chê bai một đồng nghiệp khác.',
+    choices:[
+      {label:'Tham gia hùa theo bình luận cho vui, dù không thật sự nghĩ vậy', tags:['reactive'], type:'bad',
+        fb:'Tham gia bàn tán, dù chỉ "cho vui", cũng góp phần nuôi dưỡng văn hóa nói xấu sau lưng nơi công sở.'},
+      {label:'Khéo léo không tham gia bình luận, và rời khỏi nhóm chat đó', tags:['boundary'], type:'good',
+        fb:'Không tiếp tay cho việc bàn tán là cách bảo vệ chính bạn khỏi bị cuốn vào những rắc rối không đáng có.'},
+      {label:'Đọc hết tin nhắn nhưng không phản hồi gì', tags:['avoidant'], type:'neutral',
+        fb:'Im lặng đọc mà không phản đối đôi khi vẫn khiến bạn bị xem là ngầm đồng tình với nhóm.'}
+    ]
+  },
+  {
+    tag:'Bị lôi vào "chọn phe"',
+    text:'Hai đồng nghiệp thân với bạn đang cãi nhau gay gắt, cả hai đều muốn bạn đứng về phía mình.',
+    choices:[
+      {label:'Chọn phe theo cảm tính, vì ngại làm mất lòng người thân hơn', tags:['reactive'], type:'bad',
+        fb:'Chọn phe theo cảm tính dễ khiến bạn bị cuốn sâu vào mâu thuẫn không phải của mình, và mất luôn mối quan hệ với phía còn lại.'},
+      {label:'Từ chối chọn phe, giữ vai trò trung lập và khuyên hai bên trực tiếp nói chuyện', tags:['calm','boundary'], type:'good',
+        fb:'Giữ trung lập và khuyến khích hai bên tự giải quyết là cách tôn trọng cả hai mối quan hệ mà không khiến bạn bị kẹt giữa.'},
+      {label:'Né tránh cả hai người, tránh mặt để khỏi bị hỏi ý kiến', tags:['avoidant'], type:'neutral',
+        fb:'Né tránh có thể giúp bạn "thoát" tạm thời, nhưng cũng khiến cả hai người cảm thấy bạn không đáng tin cậy để chia sẻ.'}
+    ]
+  },
+  {
+    tag:'Nghe nói xấu sau lưng',
+    text:'Vô tình đi ngang phòng nghỉ, bạn nghe thấy một đồng nghiệp đang nói xấu mình với người khác.',
+    choices:[
+      {label:'Xông vào đối chất gay gắt ngay tại chỗ trước mặt nhiều người', tags:['reactive'], type:'bad',
+        fb:'Đối chất trong lúc nóng giận, trước đám đông, dễ khiến bạn mất kiểm soát và biến thành "người có vấn đề" trong mắt người khác.'},
+      {label:'Hẹn gặp riêng, hỏi thẳng nhưng ôn hòa về điều mình nghe được', tags:['calm','selfcare'], type:'good',
+        fb:'Trao đổi riêng tư, ôn hòa giúp bạn hiểu rõ vấn đề và cho đối phương cơ hội giải thích, thay vì để hiểu lầm âm ỉ.'},
+      {label:'Giả vờ như không nghe thấy gì, im lặng cho qua chuyện', tags:['suppress'], type:'neutral',
+        fb:'Nuốt cảm giác bị tổn thương vào trong không giúp nó biến mất — nó chỉ chờ dịp khác để bùng lên.'}
+    ]
+  },
+  {
+    tag:'Bị "cướp công"',
+    text:'Trong cuộc họp, một đồng nghiệp nhận hết công lao về ý tưởng mà chính bạn đã đề xuất.',
+    choices:[
+      {label:'Đăng đàn "bóc phốt" ngay trên nhóm chat công ty để mọi người biết sự thật', tags:['reactive'], type:'bad',
+        fb:'Công khai đối đầu ngay lập tức dễ biến thành một cuộc "combat" gây khó xử cho cả bạn và cả phòng ban.'},
+      {label:'Bình tĩnh trình bày rõ đóng góp của mình với sếp, kèm bằng chứng cụ thể', tags:['boundary'], type:'good',
+        fb:'Trình bày sự thật bằng dữ liệu cụ thể, đúng người đúng chỗ, giúp bạn bảo vệ công sức mà không cần "làm ầm" lên.'},
+      {label:'Im lặng cho qua vì "thôi kệ, không muốn dây vào drama"', tags:['avoidant'], type:'neutral',
+        fb:'Bỏ qua liên tục có thể khiến người khác nghĩ việc "cướp công" của bạn là chuyện bình thường, và lặp lại về sau.'}
+    ]
+  },
+  {
+    tag:'Combat trong nhóm chat',
+    text:'Nhóm chat chung của công ty đang tranh cãi gay gắt về một quyết định, và có người nhắc thẳng tên bạn.',
+    choices:[
+      {label:'Nhảy vào "combat" ngay trên chat, gõ một tràng dài lúc nửa đêm', tags:['reactive'], type:'bad',
+        fb:'Tranh cãi công khai trên nhóm chat, nhất là lúc nóng giận, thường khiến mọi chuyện bị lưu lại và khó xoa dịu.'},
+      {label:'Nhắn tin riêng, đề nghị giải quyết vấn đề ngoài nhóm chat công khai', tags:['calm','boundary'], type:'good',
+        fb:'Chuyển cuộc trò chuyện sang kênh riêng tư giúp hạ nhiệt căng thẳng và giữ được sự chuyên nghiệp trước tập thể.'},
+      {label:'Thoát khỏi nhóm chat ngay lập tức cho đỡ phiền', tags:['avoidant'], type:'neutral',
+        fb:'Rời nhóm có thể giúp bạn nhẹ đầu tạm thời, nhưng vấn đề nhắc tên bạn vẫn còn đó và có thể bị hiểu lầm là "trốn tránh".'}
+    ]
+  },
+  {
+    tag:'Vô tình biết bí mật',
+    text:'Bạn tình cờ phát hiện hai đồng nghiệp đang hẹn hò bí mật, điều mà họ chưa muốn ai biết.',
+    choices:[
+      {label:'Kể lại cho vài người thân thiết, "chỉ để tám chuyện cho vui"', tags:['reactive'], type:'bad',
+        fb:'Chia sẻ bí mật của người khác, dù không ác ý, vẫn có thể gây tổn hại nghiêm trọng đến sự riêng tư và lòng tin của họ dành cho bạn.'},
+      {label:'Giữ kín, xem đó là chuyện riêng tư không liên quan đến mình', tags:['boundary','empathy'], type:'good',
+        fb:'Tôn trọng ranh giới riêng tư của người khác là nền tảng để xây dựng lòng tin — dù không ai biết bạn đã làm điều đó.'},
+      {label:'Thỉnh thoảng đùa cợt bóng gió trước mặt hai người khi có dịp', tags:['avoidant'], type:'neutral',
+        fb:'Trêu chọc bóng gió có thể khiến hai người cảm thấy không an toàn và mất tự nhiên khi ở cạnh bạn.'}
+    ]
+  },
+  {
+    tag:'Bị cô lập',
+    text:'Gần đây bạn nhận ra mình không còn được rủ đi ăn trưa cùng nhóm đồng nghiệp thân thiết như trước.',
+    choices:[
+      {label:'Tự ái, quay ra "tẩy chay" ngược lại cả nhóm', tags:['reactive'], type:'bad',
+        fb:'Đáp trả bằng cách xa lánh ngược lại thường khiến khoảng cách càng lớn hơn, thay vì được thu hẹp.'},
+      {label:'Chủ động bắt chuyện, rủ một người trong nhóm đi cà phê riêng để hiểu chuyện gì đang xảy ra', tags:['empathy','selfcare'], type:'good',
+        fb:'Chủ động kết nối lại, dù chỉ với một người, thường là bước đầu hiệu quả để hoá giải hiểu lầm hoặc khoảng cách vô tình.'},
+      {label:'Ăn trưa một mình, im lặng chịu đựng cảm giác bị bỏ rơi', tags:['avoidant'], type:'neutral',
+        fb:'Chịu đựng một mình có thể khiến cảm giác cô lập kéo dài hơn cần thiết, trong khi vấn đề có thể chỉ là hiểu lầm nhỏ.'}
+    ]
+  },
+  {
+    tag:'Sếp thiên vị',
+    text:'Sếp rõ ràng thiên vị một nhân viên khác, khiến cả team âm ỉ bất mãn trong các cuộc trò chuyện riêng.',
+    choices:[
+      {label:'Tham gia nhóm chat riêng "kể tội" sếp cùng cả team cho hả giận', tags:['reactive'], type:'bad',
+        fb:'Bàn tán sau lưng có thể giải tỏa cảm xúc nhất thời, nhưng không thay đổi được tình hình và dễ lan ra ngoài tầm kiểm soát.'},
+      {label:'Góp ý trực tiếp, riêng tư và mang tính xây dựng với sếp về vấn đề này', tags:['calm','boundary'], type:'good',
+        fb:'Phản hồi trực tiếp, đúng cách, là con đường thực sự có thể tạo ra thay đổi — thay vì chỉ than vãn sau lưng.'},
+      {label:'Im lặng chịu đựng, chỉ than thở với bạn bè ngoài công ty', tags:['avoidant'], type:'neutral',
+        fb:'Giải tỏa với người ngoài giúp bạn nhẹ lòng, nhưng vấn đề tại nơi làm việc vẫn sẽ tiếp diễn nếu không ai lên tiếng đúng chỗ.'}
+    ]
+  },
+  {
+    tag:'Bị nhờ làm "gián điệp"',
+    text:'Một đồng nghiệp thân thiết nhờ bạn dò hỏi, báo cáo lại tình hình nội bộ của một phòng ban khác.',
+    choices:[
+      {label:'Đồng ý ngay vì muốn lấy lòng, chủ động thu thập thông tin nội bộ', tags:['reactive'], type:'bad',
+        fb:'Trở thành "tai mắt" cho người khác có thể khiến bạn mất lòng tin từ cả hai phía nếu chuyện bị phát hiện.'},
+      {label:'Từ chối khéo, giải thích rõ đây không phải vai trò và mong muốn của mình', tags:['boundary'], type:'good',
+        fb:'Từ chối rõ ràng, tôn trọng, giúp bạn giữ được sự trung lập và uy tín ở nơi làm việc.'},
+      {label:'Ậm ừ cho qua chuyện, nhưng thật ra không thực sự làm gì', tags:['avoidant'], type:'neutral',
+        fb:'Né tránh trực tiếp trả lời có thể khiến người nhờ hiểu lầm rằng bạn đã đồng ý, dẫn đến kỳ vọng sai trong tương lai.'}
+    ]
+  }
+];
+
+let currentIndex = 0;
+let scoreRaw = 0; // -8..+16 range roughly
+let tagCounts = {};
+let answeredThisRound = false;
+
+function bumpScore(points, tags){
+  scoreRaw += points;
+  tags.forEach(t=> tagCounts[t] = (tagCounts[t]||0) + 1 );
+}
+
+/* ============ NAVIGATION ============ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  sfxWhoosh();
+  showScreen('screen-select');
+});
+
+document.getElementById('confirmCharBtn').addEventListener('click', ()=>{
+  if(!chosenChar) return;
+  sfxWhoosh();
+  setupHud();
+  buildProgressDots();
+  renderScenario();
+  showScreen('screen-game');
+});
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  currentIndex = 0; scoreRaw = 0; tagCounts = {}; chosenChar = null;
+  document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected'));
+  document.getElementById('confirmCharBtn').disabled = true;
+  showScreen('screen-intro');
+});
+
+/* ============ HUD ============ */
+function currentBarPercent(){
+  const pct = 50 + scoreRaw*3;
+  return Math.max(4, Math.min(96, pct));
+}
+function moodFromPct(pct){
+  if(pct>=66) return 'happy';
+  if(pct>=38) return 'neutral';
+  return 'sad';
+}
+function setupHud(){
+  updateHud();
+}
+function updateHud(animateSpeech){
+  const pct = currentBarPercent();
+  document.getElementById('barFill').style.width = pct+'%';
+  document.getElementById('scoreLabel').textContent = Math.round(pct)+'%';
+  const mood = moodFromPct(pct);
+  document.getElementById('hudAvatar').innerHTML = chibiSVG(chosenChar, mood) +
+    `<div class="speech-bubble" id="speechBubble"></div>`;
+}
+function buildProgressDots(){
+  const wrap = document.getElementById('progressDots');
+  wrap.innerHTML = '';
+  scenarios.forEach((_,i)=>{
+    const d = document.createElement('span');
+    d.id = 'dot-'+i;
+    wrap.appendChild(d);
+  });
+}
+function markDot(i){
+  const d = document.getElementById('dot-'+i);
+  if(d) d.classList.add('done');
+}
+
+/* ============ RENDER SCENARIO ============ */
+function renderScenario(){
+  answeredThisRound = false;
+  const sc = scenarios[currentIndex];
+  document.getElementById('scenarioTag').textContent = `${sc.tag} · Tình huống ${currentIndex+1}/${scenarios.length}`;
+  document.getElementById('scenarioText').textContent = sc.text;
+  const wrap = document.getElementById('choicesWrap');
+  wrap.innerHTML = '';
+  sc.choices.forEach((choice, idx)=>{
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.label;
+    btn.addEventListener('click', ()=> handleChoice(choice, btn));
+    wrap.appendChild(btn);
+  });
+  document.getElementById('feedbackBox').classList.remove('show','good','neutral','bad');
+  document.getElementById('nextBtn').style.display = 'none';
+}
+
+function showSpeech(text){
+  const bubble = document.getElementById('speechBubble');
+  if(!bubble) return;
+  bubble.textContent = text;
+  bubble.classList.add('show');
+  setTimeout(()=> bubble.classList.remove('show'), 1600);
+}
+
+function handleChoice(choice, btnEl){
+  if(answeredThisRound) return;
+  answeredThisRound = true;
+
+  document.querySelectorAll('.choice-btn').forEach(b=>{
+    b.disabled = true;
+    if(b!==btnEl) b.style.opacity = '0.55';
+  });
+
+  let points = 0, cls='neutral', title='', speech='';
+  if(choice.type==='good'){ points=2; cls='good'; title='Lựa chọn khôn ngoan! 🌟'; speech='Tốt lắm!'; sfxClickGood(); }
+  else if(choice.type==='bad'){ points=-1; cls='bad'; title='Hmm, hơi rủi ro đấy 💭'; speech='Ui...'; sfxClickBad(); }
+  else { points=0; cls='neutral'; title='Cũng là một cách... 🤔'; speech='Ừm...'; sfxClickNeutral(); }
+
+  bumpScore(points, choice.tags);
+  updateHud();
+  showSpeech(speech);
+  markDot(currentIndex);
+
+  const fb = document.getElementById('feedbackBox');
+  document.getElementById('fbTitle').textContent = title;
+  document.getElementById('fbBody').textContent = choice.fb;
+  fb.classList.add('show', cls);
+
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  currentIndex++;
+  if(currentIndex < scenarios.length){
+    sfxSelect();
+    renderScenario();
+  } else {
+    showResult();
+  }
+});
+
+/* ============ RESULT ============ */
+const badgeDefs = [
+  {tag:'calm', name:'Bậc Thầy Bình Tĩnh', icon:'🧘'},
+  {tag:'boundary', name:'Chuyên Gia Ranh Giới', icon:'🛡️'},
+  {tag:'empathy', name:'Người Lắng Nghe', icon:'👂'},
+  {tag:'selfcare', name:'Bạn Tốt Của Chính Mình', icon:'💛'}
+];
+
+function showResult(){
+  sfxCheer();
+  const pct = currentBarPercent();
+  const mood = moodFromPct(pct);
+  document.getElementById('resultAvatar').innerHTML = chibiSVG(chosenChar, mood);
+
+  let title, sub, tipTitle, tipBody;
+  if(pct>=70){
+    title='Xuất sắc! Bạn rất vững vàng cảm xúc 🎉';
+    sub=`Điểm sức khỏe tinh thần: ${Math.round(pct)}%`;
+    tipTitle='Giữ vững phong độ nhé!';
+    tipBody='Bạn đã cho thấy khả năng bình tĩnh, đặt ranh giới và quan tâm bản thân rất tốt. Hãy tiếp tục duy trì những thói quen lành mạnh này, và đừng ngại chia sẻ kinh nghiệm với đồng nghiệp xung quanh.';
+  } else if(pct>=45){
+    title='Khá ổn! Bạn đang trên đường cân bằng 🙂';
+    sub=`Điểm sức khỏe tinh thần: ${Math.round(pct)}%`;
+    tipTitle='Một vài gợi ý nhỏ';
+    tipBody='Bạn đã có những lựa chọn tích cực, nhưng đôi lúc vẫn còn né tránh hoặc kìm nén cảm xúc. Thử tập nói ra cảm xúc thật và đặt ranh giới rõ ràng hơn trong công việc — từng bước nhỏ cũng tạo nên khác biệt lớn.';
+  } else {
+    title='Bạn đang khá căng thẳng đấy 🌧️';
+    sub=`Điểm sức khỏe tinh thần: ${Math.round(pct)}%`;
+    tipTitle='Hãy chăm sóc bản thân nhiều hơn';
+    tipBody='Có vẻ áp lực công việc đang ảnh hưởng nhiều đến bạn. Hãy thử dành thời gian nghỉ ngơi, chia sẻ với người bạn tin tưởng, và nếu cảm giác quá tải kéo dài, đừng ngần ngại tìm đến chuyên gia tâm lý để được hỗ trợ đúng cách.';
+  }
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSub').textContent = sub;
+  document.getElementById('resultTip').innerHTML = `<b>${tipTitle}</b><br>${tipBody}`;
+
+  const shelf = document.getElementById('badgeShelf');
+  shelf.innerHTML = '';
+  let earnedAny = false;
+  badgeDefs.forEach(b=>{
+    const count = tagCounts[b.tag]||0;
+    const chip = document.createElement('div');
+    if(count>=2){
+      chip.className='badge-chip';
+      chip.innerHTML = `<span>${b.icon}</span><span>${b.name}</span>`;
+      earnedAny = true;
+    } else {
+      chip.className='badge-chip empty';
+      chip.innerHTML = `<span>🔒</span><span>${b.name}</span>`;
+    }
+    shelf.appendChild(chip);
+  });
+  if(earnedAny) setTimeout(sfxBadge, 300);
+
+  showScreen('screen-result');
+}
+</script>
+</body>
+</html>
